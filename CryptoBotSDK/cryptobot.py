@@ -1,0 +1,102 @@
+import json
+from requests import get, post
+from .types.Invoice import Invoice
+
+class CryptoBot():
+    def __init__(self, api_key: str, isTestnet = False):
+        """
+        CryptoBot is class for using the library
+        Params:
+        api_key = using for communicate with the cryptobot api
+        isTestnet = (Optional) Using for testing the bot with testnet
+        """
+
+        self.headers = {'Content-Type': 'application/json', 'Crypto-Pay-API-Token': api_key}  
+        if isTestnet == True:
+            self.url = "https://testnet-pay.crypt.bot/api"
+        else:
+            self.url = "https://pay.crypt.bot/api"
+
+    def createInvoice(self, 
+                           amount: str,
+                           asset: str, 
+                           fiat = None,
+                           accepted_assets = None,
+                           descriptoion = None,
+                           hidden_message = None,
+                           paid_btn_name = None,
+                           paid_btn_url = None,
+                           payload = None,
+                           expires_in = None,
+                           allow_comments = True,
+                           allow_anonymous = True,
+                           currency_type = "crypto"):
+        """
+        createInvoice - function for creating a payment invoice
+        
+        Params:
+            amount {string} - amount of the invoice, in fload
+            asset: {string} - Currency code, (BTC, TON, ETH)
+            fiat = {string} - Fiat code, (RUB, EUR, USD)
+            accepted_assets {string} - List of cryptocurrency alphabetic codes separated comma. Assets which can be used to pay the invoice. Available only if currency_type is “fiat”. 
+            descriptoion {string} - description of invoice
+            hidden_message {string} - Text of the message which will be presented to a user after the invoice is paid. Up to 2048 characters.
+            paid_btn_name {string} - Label of the button which will be presented to a user after the invoice is paid ( viewItem , openChannel , openBot , callback )
+            paid_btn_url {string} - Required if paid_btn_name is specified. URL opened using the button which will be presented to a user after the invoice is paid. You can set any callback link 
+            payload {string} - Any data you want to attach to the invoice (for example, user ID, payment ID, ect). Up to 4kb.
+            expires_in {int} - You can set a payment time limit for the invoice in seconds. Values between 1-2678400 are accepted
+            allow_comments {bool} - allow comments
+            allow_anonymous {bool} - allow anonymous pay
+            currency_type {string} - crypto or fiat):
+
+        Returns a Invoice type       
+        """
+        
+        data_payload = {
+            "currency_type": currency_type,
+            "amount": amount,
+            "asset": asset,
+            "allow_anonymous": allow_anonymous,
+            "allow_comments": allow_comments
+        }
+
+        if fiat != None: data_payload.update({"fiat": fiat})
+        if accepted_assets != None: data_payload.update({"accepted_assets": accepted_assets})
+        if descriptoion != None: data_payload.update({"descriptoion": descriptoion})
+        if hidden_message != None: data_payload.update({"hidden_message": hidden_message})
+        if paid_btn_name != None: data_payload.update({"paid_btn_name": paid_btn_name})
+        if paid_btn_url != None: data_payload.update({"paid_btn_url": paid_btn_url})
+        if payload != None: data_payload.update({"payload": payload})
+        if expires_in != None: data_payload.update({"expires_in": expires_in})
+
+        req = post(f"{self.url}/createInvoice", json=data_payload, headers=self.headers)
+        print(req.json())
+        jsonobj = json.loads(json.dumps(req.json()))["result"]
+
+        # FIXME: Implement the items loop, because cryptobot can give a items list
+        if "items" in jsonobj:
+            pass
+
+        # FIXME: Implement comment, hidden_message and payload to lib
+        return Invoice(
+            jsonobj['invoice_id'],
+            jsonobj['hash'],
+            jsonobj['currency_type'],
+            jsonobj['asset'],
+            jsonobj['amount'],
+            jsonobj['pay_url'],
+            jsonobj['bot_invoice_url'],
+            jsonobj['mini_app_invoice_url'],
+            jsonobj['web_app_invoice_url'],
+            jsonobj['status'],
+            jsonobj['created_at'],
+            # jsonobj['comment'] or "None",
+            # jsonobj['hidden_message '] or "None",
+            # jsonobj['payload'] or "None",
+        )
+        
+        
+        
+
+
+
