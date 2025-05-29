@@ -1,6 +1,7 @@
 import json
 from requests import get, post
 from .types.Invoice import Invoice
+from .types.Check import Check
 
 class CryptoBot():
     def __init__(self, api_key: str, isTestnet = False):
@@ -36,20 +37,21 @@ class CryptoBot():
         
         Params:
             amount {string} - amount of the invoice, in fload
-            asset {string} - Currency code, (BTC, TON, ETH)
-            fiat {string} - Fiat code, (RUB, EUR, USD)
-            accepted_assets {string} - List of cryptocurrency alphabetic codes separated comma. Assets which can be used to pay the invoice. Available only if currency_type is “fiat”. 
-            descriptoion {string} - description of invoice
-            hidden_message {string} - Text of the message which will be presented to a user after the invoice is paid. Up to 2048 characters.
-            paid_btn_name {string} - Label of the button which will be presented to a user after the invoice is paid ( viewItem , openChannel , openBot , callback )
-            paid_btn_url {string} - Required if paid_btn_name is specified. URL opened using the button which will be presented to a user after the invoice is paid. You can set any callback link 
-            payload {string} - Any data you want to attach to the invoice (for example, user ID, payment ID, ect). Up to 4kb.
-            expires_in {int} - You can set a payment time limit for the invoice in seconds. Values between 1-2678400 are accepted
-            allow_comments {bool} - allow comments
-            allow_anonymous {bool} - allow anonymous pay
-            currency_type {string} - crypto or fiat):
+            asset {string}- Currency code, (BTC, TON, ETH)
+            fiat {string} | Optional - Fiat code, (RUB, EUR, USD)
+            accepted_assets {string} | Optional - List of cryptocurrency alphabetic codes separated comma. Assets which can be used to pay the invoice. Available only if currency_type is “fiat”. 
+            descriptoion {string} | Optional - description of invoice
+            hidden_message {string} | Optional - Text of the message which will be presented to a user after the invoice is paid. Up to 2048 characters.
+            paid_btn_name {string} | Optional - Label of the button which will be presented to a user after the invoice is paid ( viewItem , openChannel , openBot , callback )
+            paid_btn_url {string} | Optional - Required if paid_btn_name is specified. URL opened using the button which will be presented to a user after the invoice is paid. You can set any callback link 
+            payload {string} | Optional - Any data you want to attach to the invoice (for example, user ID, payment ID, ect). Up to 4kb.
+            expires_in {int} | Optional - You can set a payment time limit for the invoice in seconds. Values between 1-2678400 are accepted
+            allow_comments {bool} | Optional - allow comments
+            allow_anonymous {bool} | Optional - allow anonymous pay
+            currency_type {string} | Optional - crypto or fiat):
 
-        Returns a Invoice type       
+        Responce
+            Invoice - Invoice DataClass       
         """
         
         data_payload = {
@@ -167,52 +169,81 @@ class CryptoBot():
             invoice {Invoice} - invoice dataclass
 
         Responce:
-        fail - on error
-        succes - on succes
+            fail - on error
+            succes - on succes
 
         """
         data_payload = {"invoice_id": invoice.invoice_id()}
-        res = post(f"{self.url}/createInvoice", json=data_payload, headers=self.headers)
-        if res.status_code is not 200:
+        res = post(f"{self.url}/deleteInvoice", json=data_payload, headers=self.headers)
+        if res.status_code != 200:
             return "fail"
         return "succes"
-    
-    def checkInvoice(self, invoiceid: str):
-        """
-        checkInvoice - Check invoice Status
-        Params:
-            invoiceid {string} - invoice id 
 
-        Responce: 
-            have a three station
-                active
-                paid
-                expierd
-        """
-        invoice_id = invoiceid
-        req = self.getInvoices(invoice_ids=invoice_id)
-        if req[0]:
-            return req[0].status()
-        else:
-            return "notfound"
+    def createCheck(self,
+                    amount: str,
+                    asset = "USDT",
+                    pin_to_user_id = None,
+                    pin_to_username = None
+                    ):
         
-    def deleteInvoice(self, invoiceid: str):
         """
-        deleteInvoice - delete a invoice created by your app
+        createCheck - Function for creating checks using app balance
+
+        WARNING: for use this u need to enable checks in app settings!
+
         Params:
-            invoice {string} - invoice id
+
+            amount {string} - amount of check
+            asset {string} | Optional - asset, currently, can be “USDT”, “TON”, “BTC”, “ETH”, “LTC”, “BNB”, “TRX” and “USDC”, default is USDT
+            pin_to_user_id {int} | Optional - pin check only for user, pin by userid
+            pin_to_username {string} | Optional - pin check only for user, pin by username
 
         Responce:
-        fail - on error
-        succes - on succes
+
+            Check - Check DataClass
+        """
+
+        data_payload = {
+            "asset": asset,
+            "amount": amount
+        }
+        if pin_to_user_id is not None: data_payload.update({"pin_to_user_id": pin_to_user_id})
+        if pin_to_username is not None: data_payload.update({"pin_to_username": pin_to_username})
+
+        req = post(f"{self.url}/createCheck", json=data_payload, headers=self.headers)
+
+        if req.json()["ok"] == False:
+            return f"Error code: {req.json()["error"]["code"]} | name: {req.json()["error"]["name"]}"
+        
+        activated_at_res = "check_not_activated"
+        if req.json()["result"]["status"] == "activated": activated_at_res = req.json()["result"]["activated_at"]
+        
+        return Check(check_id=req.json()["result"]["check_id"],
+                     hash=req.json()["result"]["hash"],
+                     asset=req.json()["result"]["asset"],
+                     amount=req.json()["result"]["amount"],
+                     bot_check_url=req.json()["result"]["bot_check_url"],
+                     status=req.json()["result"]["status"],
+                     created_at=req.json()["result"]["created_at"],
+                     activated_at=activated_at_res)
+    
+    def deleteCheck(self, check: Check):
+        """
+        deleteCheck - delete a check created by your app
+        Params:
+            check {Check} - check dataclass
+
+        Responce:
+            fail - on error
+            succes - on succes
 
         """
-        data_payload = {"invoice_id": invoiceid}
-        res = post(f"{self.url}/createInvoice", json=data_payload, headers=self.headers)
-        if res.status_code is not 200:
+        data_payload = {"check_id": check.check_id()}
+        res = post(f"{self.url}/deleteCheck", json=data_payload, headers=self.headers)
+        if res.status_code != 200:
             return "fail"
         return "succes"
-
+        
 
         
         
