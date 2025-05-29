@@ -243,6 +243,55 @@ class CryptoBot():
         if res.status_code != 200:
             return "fail"
         return "succes"
+    
+    def getChecks(self, 
+                  asset = None,
+                  check_ids = None,
+                  status = None,
+                  offset = None,
+                  count = None):
+        data_payload = {}
+        if asset is not None: data_payload.update({"asset": asset})
+        if check_ids is not None: data_payload.update({"check_ids": check_ids})
+        if status is not None: data_payload.update({"status": status})
+        if offset is not None: data_payload.update({"offset": offset})
+        if count is not None: data_payload.update({"count": count})
+
+        items = []
+
+        req = get(f"{self.url}/getChecks", headers=self.headers, json=data_payload)
+        for i in req.json()["result"]["items"]:
+            activated_res = "check_not_activated"
+            if "activated_at" in i: activated_res = i['activated_at']
+            items.append(Check(
+                check_id=i["check_id"],
+                hash=i['hash'],
+                asset=i["asset"],
+                amount=i["amount"],
+                bot_check_url=i["bot_check_url"],
+                status=i["status"],
+                created_at=i["created_at"],
+                activated_at=activated_res
+            ))
+        return items
+    
+    def checkCheck(self, check: Check):
+        """
+        checkCheck - View Check Status
+        Params:
+            check {Check} - Check DataClass
+
+        Responce: 
+            have a three station
+                active
+                activated
+        """
+        check_id = check.check_id()
+        req = self.getChecks(check_ids=check_id)
+        if req[0]:
+            return req[0].status()
+        else:
+            return "notfound"
         
 
         
