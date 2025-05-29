@@ -12,7 +12,7 @@ class CryptoBot():
         """
 
         self.headers = {'Content-Type': 'application/json', 'Crypto-Pay-API-Token': api_key}  
-        if isTestnet == True:
+        if isTestnet:
             self.url = "https://testnet-pay.crypt.bot/api"
         else:
             self.url = "https://pay.crypt.bot/api"
@@ -60,14 +60,14 @@ class CryptoBot():
             "allow_comments": allow_comments
         }
 
-        if fiat != None: data_payload.update({"fiat": fiat})
-        if accepted_assets != None: data_payload.update({"accepted_assets": accepted_assets})
-        if descriptoion != None: data_payload.update({"descriptoion": descriptoion})
-        if hidden_message != None: data_payload.update({"hidden_message": hidden_message})
-        if paid_btn_name != None: data_payload.update({"paid_btn_name": paid_btn_name})
-        if paid_btn_url != None: data_payload.update({"paid_btn_url": paid_btn_url})
-        if payload != None: data_payload.update({"payload": payload})
-        if expires_in != None: data_payload.update({"expires_in": expires_in})
+        if fiat is not None: data_payload.update({"fiat": fiat})
+        if accepted_assets is not None: data_payload.update({"accepted_assets": accepted_assets})
+        if descriptoion is not None: data_payload.update({"descriptoion": descriptoion})
+        if hidden_message is not None: data_payload.update({"hidden_message": hidden_message})
+        if paid_btn_name is not None: data_payload.update({"paid_btn_name": paid_btn_name})
+        if paid_btn_url is not None: data_payload.update({"paid_btn_url": paid_btn_url})
+        if payload is not None: data_payload.update({"payload": payload})
+        if expires_in is not None: data_payload.update({"expires_in": expires_in})
 
         req = post(f"{self.url}/createInvoice", json=data_payload, headers=self.headers)
         jsonobj = json.loads(json.dumps(req.json()))["result"]
@@ -107,12 +107,12 @@ class CryptoBot():
                     offset = None,
                     count = None):
         data_payload = {}
-        if fiat != None: data_payload.update({"fiat": fiat})
-        if invoice_ids != None: data_payload.update({"invoice_ids": invoice_ids})
-        if status != None: data_payload.update({"status": status})
-        if asset != None: data_payload.update({"asset": asset})
-        if offset != None: data_payload.update({"offset": offset})
-        if count != None: data_payload.update({"count": count})
+        if fiat is not None: data_payload.update({"fiat": fiat})
+        if invoice_ids is not None: data_payload.update({"invoice_ids": invoice_ids})
+        if status is not None: data_payload.update({"status": status})
+        if asset is not None: data_payload.update({"asset": asset})
+        if offset is not None: data_payload.update({"offset": offset})
+        if count is not None: data_payload.update({"count": count})
 
         items = []
 
