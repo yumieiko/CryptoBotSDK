@@ -2,6 +2,7 @@ import json
 from requests import get, post
 from .types.Invoice import Invoice
 from .types.Check import Check
+from .types.Transfer import Transfer
 
 class CryptoBot():
     def __init__(self, api_key: str, isTestnet = False):
@@ -293,6 +294,42 @@ class CryptoBot():
         else:
             return "notfound"
         
+    
+    def transfer(self,
+                 user_id: int,
+                 amoun: str,
+                 spend_id: str,
+                 asset = "USDT",
+                 comment = None,
+                 disable_send_notification = False):
+        data_payload = {
+            "user_id": user_id,
+            "amount": amoun,
+            "spend_id": spend_id,
+            "asset": asset
+        }
+
+        if comment is not None: data_payload.update({"comment": comment})
+        if disable_send_notification is not None: data_payload.update({"disable_send_notification": disable_send_notification})
+        
+        req = get(f"{self.url}/transfer", headers=self.headers, json=data_payload)
+        req_data = req.json()
+
+        if req_data['ok'] == False:
+            return f"error:code:{req_data["result"]["code"]}:name:{req_data["result"]["name"]}:message:{req_data["result"]["message"]}"
+        
+        commented = "comment_not_provided"
+        if "comment" in req_data["result"]: commented = req_data["result"]['comment']
+        return Transfer(
+            transfer_id=req_data["result"]["transfer_id"],
+            spend_id=req_data["result"]["spend_id"],
+            user_id=req_data["result"]["user_id"],
+            asset=req_data["result"]["asset"],
+            amount=req_data["result"]["amount"],
+            status=req_data["result"]["status"],
+            completed_at=req_data["result"]["completed_at"],
+            comment=commented,
+            )
 
         
         
