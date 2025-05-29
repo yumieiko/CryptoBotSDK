@@ -99,6 +99,30 @@ class CryptoBot():
             hidden_message=hidden_message_res,
             payload=payload_res
         )
+    
+    def getInvoices(self,
+                    asset = None,
+                    fiat = None,
+                    invoice_ids = None,
+                    status = None,
+                    offset = None,
+                    count = None):
+        data_payload = {}
+        if fiat != None: data_payload.update({"fiat": fiat})
+        if invoice_ids != None: data_payload.update({"invoice_ids": invoice_ids})
+        if status != None: data_payload.update({"status": status})
+        if asset != None: data_payload.update({"asset": asset})
+        if offset != None: data_payload.update({"offset": offset})
+        if count != None: data_payload.update({"count": count})
+
+        req = get(f"{self.url}/getInvoices", headers=self.headers, json=data_payload)
+        return req.json()
+    
+    def checkInvoice(self, invoice: Invoice):
+        invoice_id = invoice.invoice_id()
+        print(invoice_id)
+        req = self.getInvoices(invoice_ids=invoice_id)
+        return req["result"]["items"][0]["status"]
         
         
         
