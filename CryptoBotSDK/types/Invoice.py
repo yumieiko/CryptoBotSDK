@@ -1,3 +1,5 @@
+import warnings
+
 class Invoice:
     def __init__(self,
                  invoice_id: int,
@@ -9,43 +11,48 @@ class Invoice:
                  web_app_invoice_url: str,
                  status: str,
                  created_at: str,
-                 comment = None,
-                 hidden_message = None,
-                 payload = None
+                 comment: str,
+                 hidden_message: str,
+                 payload: str
                  ):
-        self.invoice_id = invoice_id
-        self.hash = hash
-        self.currency_type = currency_type
-        self.amount = amount
-        self.bot_invoice_url = bot_invoice_url
-        self.mini_app_invoice_url = mini_app_invoice_url
-        self.web_app_invoice_url = web_app_invoice_url
-        self.status = status
-        self.created_at = created_at
-        self.comment = comment
-        self.hidden_message = hidden_message
-        self.payload = payload
+        self.pinvoice_id = invoice_id
+        self.phash = hash
+        self.pcurrency_type = currency_type
+        self.pamount = amount
+        self.pbot_invoice_url = bot_invoice_url
+        self.pmini_app_invoice_url = mini_app_invoice_url
+        self.pweb_app_invoice_url = web_app_invoice_url
+        self.pstatus = status
+        self.pcreated_at = created_at
+        self.pcomment = comment
+        self.phidden_message = hidden_message
+        self.ppayload = payload
 
-    def get(self):
-        def invoice_id(self):
-            return self.invoice_id
-        def hash(self):
-            return self.hash
-        def currency_type(self):
-            return self.currency_type
-        def amount(self):
-            return self.amount
-        def bot_invoice_url(self):
-            return self.bot_invoice_url
-        def mini_app_invoice_url(self):
-            return self.mini_app_invoice_url
-        def web_app_invoice_url(self):
-            return self.web_app_invoice_url
-        def status(self):
-            return self.status
-        def comment(self):
-            return self.comment
-        def hidden_message(self):
-            return self.hidden_message
-        def payload(self):
-            return self.payload
+    def hash(self):
+        return self.phash
+    def currency_type(self):
+        return self.pcurrency_type
+    def amount(self):
+        return self.pamount
+    def bot_invoice_url(self):
+        return self.pbot_invoice_url
+    def mini_app_invoice_url(self):
+        return self.pmini_app_invoice_url
+    def web_app_invoice_url(self):
+        return self.pweb_app_invoice_url
+    def status(self):
+        return self.pstatus
+    def comment(self):
+        if self.pcomment == "not_provided_stuff":
+            warnings.warn("[Invoice]: [self]: [comment]: Stuff Not provided!")
+        return self.pcomment
+    def hidden_message(self):
+        if self.phidden_message == "not_provided_stuff":
+            warnings.warn("[Invoice]: [self]: [hidden_message]: Stuff Not provided!")
+        return self.phidden_message
+    def payload(self):
+        if self.ppayload == "not_provided_stuff":
+            warnings.warn("[Invoice]: [self]: [payload]: Stuff Not provided!")
+        return self.ppayload
+    def invoice_id(self):
+        return self.pinvoice_id

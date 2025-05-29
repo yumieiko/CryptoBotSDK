@@ -77,22 +77,27 @@ class CryptoBot():
         if "items" in jsonobj:
             pass
 
-        # FIXME: Implement comment, hidden_message and payload to lib
+        comment_res = "not_provided_stuff"
+        if "comment" in jsonobj: comment_res = jsonobj['comment']
+        hidden_message_res = "not_provided_stuff"
+        if "hidden_message" in jsonobj: hidden_message_res = jsonobj['comment']
+        payload_res = "not_provided_stuff"
+        if "payload" in jsonobj: payload_res = jsonobj['payload']
+        
+
         return Invoice(
-            jsonobj['invoice_id'],
-            jsonobj['hash'],
-            jsonobj['currency_type'],
-            jsonobj['asset'],
-            jsonobj['amount'],
-            jsonobj['pay_url'],
-            jsonobj['bot_invoice_url'],
-            jsonobj['mini_app_invoice_url'],
-            jsonobj['web_app_invoice_url'],
-            jsonobj['status'],
-            jsonobj['created_at'],
-            # jsonobj['comment'] or "None",
-            # jsonobj['hidden_message '] or "None",
-            # jsonobj['payload'] or "None",
+            invoice_id=jsonobj['invoice_id'],
+            hash=jsonobj['hash'],
+            currency_type=jsonobj['currency_type'],
+            amount=jsonobj['amount'],
+            bot_invoice_url=jsonobj['bot_invoice_url'],
+            mini_app_invoice_url=jsonobj['mini_app_invoice_url'],
+            web_app_invoice_url=jsonobj['web_app_invoice_url'],
+            status=jsonobj['status'],
+            created_at=jsonobj['created_at'],
+            comment=comment_res,
+            hidden_message=hidden_message_res,
+            payload=payload_res
         )
         
         
