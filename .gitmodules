@@ -1,0 +1,3 @@
+[submodule "examples/telegram-bot"]
+	path = examples/telegram-bot
+	url = git@github.com:https://github.com/yumieiko/telegram-bot-cryptobot.git
