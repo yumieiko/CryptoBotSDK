@@ -70,7 +70,6 @@ class CryptoBot():
         if expires_in != None: data_payload.update({"expires_in": expires_in})
 
         req = post(f"{self.url}/createInvoice", json=data_payload, headers=self.headers)
-        print(req.json())
         jsonobj = json.loads(json.dumps(req.json()))["result"]
 
         # FIXME: Implement the items loop, because cryptobot can give a items list
@@ -115,14 +114,40 @@ class CryptoBot():
         if offset != None: data_payload.update({"offset": offset})
         if count != None: data_payload.update({"count": count})
 
+        items = []
+
         req = get(f"{self.url}/getInvoices", headers=self.headers, json=data_payload)
-        return req.json()
+        for i in req.json()["result"]["items"]:
+            comment_res = "not_provided_stuff"
+            if "comment" in i: comment_res = i['comment']
+            hidden_message_res = "not_provided_stuff"
+            if "hidden_message" in i: hidden_message_res = i['comment']
+            payload_res = "not_provided_stuff"
+            if "payload" in i: payload_res = i['payload']
+            items.append(Invoice(
+                invoice_id=i['invoice_id'],
+                hash=i['hash'],
+                currency_type=i['currency_type'],
+                amount=i['amount'],
+                bot_invoice_url=i['bot_invoice_url'],
+                mini_app_invoice_url=i['mini_app_invoice_url'],
+                web_app_invoice_url=i['web_app_invoice_url'],
+                status=i['status'],
+                created_at=i['created_at'],
+                comment=comment_res,
+                hidden_message=hidden_message_res,
+                payload=payload_res
+            ))
+        return items
+    
     
     def checkInvoice(self, invoice: Invoice):
         invoice_id = invoice.invoice_id()
-        print(invoice_id)
         req = self.getInvoices(invoice_ids=invoice_id)
-        return req["result"]["items"][0]["status"]
+        if req[0]:
+            return req[0].status()
+        else:
+            return "notfound"
         
         
         
