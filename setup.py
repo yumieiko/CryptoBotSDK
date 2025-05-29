@@ -21,7 +21,7 @@ setup(
         'Programming Language :: Python :: 3',
         'Topic :: Software Development :: Libraries :: Python Modules'
     ],
-    packages = ['CryptoBotSDK'],
+    packages = ['CryptoBotSDK', 'CryptoBotSDK/types'],
     where = ['where'],
     install_requires = ['requests'],
 )
