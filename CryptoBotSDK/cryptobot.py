@@ -36,8 +36,8 @@ class CryptoBot():
         
         Params:
             amount {string} - amount of the invoice, in fload
-            asset: {string} - Currency code, (BTC, TON, ETH)
-            fiat = {string} - Fiat code, (RUB, EUR, USD)
+            asset {string} - Currency code, (BTC, TON, ETH)
+            fiat {string} - Fiat code, (RUB, EUR, USD)
             accepted_assets {string} - List of cryptocurrency alphabetic codes separated comma. Assets which can be used to pay the invoice. Available only if currency_type is “fiat”. 
             descriptoion {string} - description of invoice
             hidden_message {string} - Text of the message which will be presented to a user after the invoice is paid. Up to 2048 characters.
@@ -142,12 +142,78 @@ class CryptoBot():
     
     
     def checkInvoice(self, invoice: Invoice):
+        """
+        checkInvoice - Check invoice Status
+        Params:
+            invoice {Invoice} - Invoice DataClass
+
+        Responce: 
+            have a three station
+                active
+                paid
+                expierd
+        """
         invoice_id = invoice.invoice_id()
         req = self.getInvoices(invoice_ids=invoice_id)
         if req[0]:
             return req[0].status()
         else:
             return "notfound"
+        
+    def deleteInvoice(self, invoice: Invoice):
+        """
+        deleteInvoice - delete a invoice created by your app
+        Params:
+            invoice {Invoice} - invoice dataclass
+
+        Responce:
+        fail - on error
+        succes - on succes
+
+        """
+        data_payload = {"invoice_id": invoice.invoice_id()}
+        res = post(f"{self.url}/createInvoice", json=data_payload, headers=self.headers)
+        if res.status_code is not 200:
+            return "fail"
+        return "succes"
+    
+    def checkInvoice(self, invoiceid: str):
+        """
+        checkInvoice - Check invoice Status
+        Params:
+            invoiceid {string} - invoice id 
+
+        Responce: 
+            have a three station
+                active
+                paid
+                expierd
+        """
+        invoice_id = invoiceid
+        req = self.getInvoices(invoice_ids=invoice_id)
+        if req[0]:
+            return req[0].status()
+        else:
+            return "notfound"
+        
+    def deleteInvoice(self, invoiceid: str):
+        """
+        deleteInvoice - delete a invoice created by your app
+        Params:
+            invoice {string} - invoice id
+
+        Responce:
+        fail - on error
+        succes - on succes
+
+        """
+        data_payload = {"invoice_id": invoiceid}
+        res = post(f"{self.url}/createInvoice", json=data_payload, headers=self.headers)
+        if res.status_code is not 200:
+            return "fail"
+        return "succes"
+
+
         
         
         
