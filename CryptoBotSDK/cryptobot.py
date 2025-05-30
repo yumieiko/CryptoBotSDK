@@ -230,7 +230,7 @@ class CryptoBot():
     
     def deleteCheck(self, check: Check):
         """
-        deleteCheck - delete a check created by your app
+        deleteCheck - Use this method to delete checks created by your app. Returns True on success
         Params:
             check {Check} - check dataclass
 
@@ -302,6 +302,29 @@ class CryptoBot():
                  asset = "USDT",
                  comment = None,
                  disable_send_notification = False):
+        
+        """
+        Transfer - Use this method to send coins from your app's balance to a user. On success, returns completed transfer.
+        
+        Params:
+
+            user_id (Number) - User ID in Telegram. User must have previously used @CryptoBot (@CryptoTestnetBot for testnet).
+            
+            asset (String) - Cryptocurrency alphabetic code. Supported assets: “USDT”, “TON”, “BTC”, “ETH”, “LTC”, “BNB”, “TRX” and “USDC” (and “JET” for testnet).
+            
+            amount (String) - Amount of the transfer in float. The minimum and maximum amount limits for each of the supported assets roughly correspond to 1-25000 USD. Use getExchangeRates to convert amounts. For example: 125.50
+            
+            spend_id (String) - Random UTF-8 string unique per transfer for idempotent requests. The same spend_id can be accepted only once from your app. Up to 64 symbols.
+            
+            comment (String) - ​Optional. Comment for the transfer. Users will see this comment in the notification about the transfer. Up to 1024 symbols.
+            
+            disable_send_notification (Boolean) - ​Optional. Pass true to not send to the user the notification about the transfer. Defaults to false.
+
+        Responce:
+
+        Transfer datatype
+        
+        """
         data_payload = {
             "user_id": user_id,
             "amount": amoun,
@@ -330,6 +353,57 @@ class CryptoBot():
             completed_at=req_data["result"]["completed_at"],
             comment=commented,
             )
+    
+    def getTransfers(self,
+                     asset = None,
+                     transfer_ids = None,
+                     spend_id = None,
+                     offset = None,
+                     count = None):
+        
+        """
+        getTransfers - Use this method to get transfers created by your app. On success, returns array of Transfer
+        Params: 
+            asset (String) - Optional. Cryptocurrency alphabetic code. Supported assets: “USDT”, “TON”, “BTC”, “ETH”, “LTC”, “BNB”, “TRX” and “USDC” (and “JET” for testnet). Defaults to all currencies.
+
+            transfer_ids (String) - ​Optional. List of transfer IDs separated by comma.
+
+            spend_id (String) - Optional. Unique UTF-8 transfer string.
+
+            offset (Number) - ​Optional. Offset needed to return a specific subset of transfers. Defaults to 0.
+
+            count (Number) - ​Optional. Number of transfers to be returned. Values between 1-1000 are accepted. Defaults to 100.
+
+        Responce:
+            list of Transfer dataclass
+        """
+
+        data_payload = {}
+        if asset is not None: data_payload.update({"asset": asset})
+        if transfer_ids is not None: data_payload.update({"transfer_ids": transfer_ids})
+        if spend_id is not None: data_payload.update({"transfer_ids": transfer_ids})
+        if offset is not None: data_payload.update({"offset": offset})
+        if count is not None: data_payload.update({"count": count})
+
+        items = []
+
+        req = get(f"{self.url}/getTransfers", headers=self.headers, json=data_payload)
+        for i in req.json()["result"]["items"]:
+            comment_res = "comment_not_avaliable"
+            if "comment" in i: comment_res = i['comment']
+            items.append(Transfer(
+                transfer_id=i["transfer_id"],
+                spend_id=i["spend_id"],
+                user_id=i["user_id"],
+                asset=i["asset"],
+                amount=i["amount"],
+                status=i["status"],
+                completed_at=["completed_at"],
+                comment=comment_res
+            ))
+        return items
+    
+
 
         
         
