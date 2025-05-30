@@ -4,6 +4,8 @@ from .types.Invoice import Invoice
 from .types.Check import Check
 from .types.Transfer import Transfer
 from .types.Balance import Balance
+from .types.ExchangeRate import ExchangeRate
+import pprint
 
 class CryptoBot():
     def __init__(self, api_key: str, isTestnet = False):
@@ -421,7 +423,59 @@ class CryptoBot():
         for i in req.json()["result"]:
             if i["currency_code"] == currency_code:
                 return Balance(currencry_code=i["currency_code"], available=i["available"], onhold=i["onhold"])
+            
+    def getExchangesRates(self):
+        """
+        getExchangesRate - Use this method to get exchange rates of supported currencies.
+        Parameters:
+            none
+        
+        Returns:
+            array of ExchangeRate
+        """
+        req = get(url=f"{self.url}/getExchangeRates", headers=self.headers)
 
+        if req.json()["ok"] == False:
+            return "error"
+
+        data_list = []
+        for i in req.json()["result"]:
+            data_list.append(ExchangeRate(
+                is_valid=i["is_valid"],
+                is_fiat=i["is_fiat"],
+                is_crypto=i["is_crypto"],
+                source=i["source"],
+                target=i["target"],
+                rate=i["rate"]
+                ))
+        
+        return data_list
+
+    def getExchangeRate(self, source: str, target: str):
+        req = get(url=f"{self.url}/getExchangeRates", headers=self.headers)
+
+        if req.json()["ok"] == False:
+            return "error"
+        
+        for i in req.json()["result"]:
+            if i["source"] == source and i["target"] == target:
+                return ExchangeRate(
+                    is_valid=i["is_valid"],
+                    is_fiat=i["is_fiat"],
+                    is_crypto=i["is_crypto"],
+                    source=i["source"],
+                    target=i["target"],
+                    rate=i["rate"]
+                )
+            else:
+                return ExchangeRate(
+                    is_valid="source_or_target_not_avaliable",
+                    is_fiat="source_or_target_not_avaliable",
+                    is_crypto="source_or_target_not_avaliable",
+                    source="source_or_target_not_avaliable",
+                    target="source_or_target_not_avaliable",
+                    rate="source_or_target_not_avaliable"
+                )
 
         
         
