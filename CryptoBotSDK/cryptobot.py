@@ -3,6 +3,7 @@ from requests import get, post
 from .types.Invoice import Invoice
 from .types.Check import Check
 from .types.Transfer import Transfer
+from .types.Balance import Balance
 
 class CryptoBot():
     def __init__(self, api_key: str, isTestnet = False):
@@ -403,6 +404,23 @@ class CryptoBot():
             ))
         return items
     
+    def getBalance(self, currency_code = None):
+        """
+        getBalance - Get Ur Balance in any of currency
+        Params:
+            currency_code (strng) - “USDT”, “TON”, “BTC”, “ETH”, “LTC”, “BNB”, “TRX” and “USDC”
+
+        Responce:
+            Balance Dataclass
+        """
+        req = get(f"{self.url}/getBalance", headers=self.headers)
+        # FIXME: Make prettier error code responce
+        if req.json()["result"] == False:
+            return False
+        
+        for i in req.json()["result"]:
+            if i["currency_code"] == currency_code:
+                return Balance(currencry_code=i["currency_code"], available=i["available"], onhold=i["onhold"])
 
 
         
