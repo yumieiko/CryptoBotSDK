@@ -5,7 +5,8 @@ from .types.Check import Check
 from .types.Transfer import Transfer
 from .types.Balance import Balance
 from .types.ExchangeRate import ExchangeRate
-import pprint
+from .types.Currencies import Currencies
+
 
 class CryptoBot():
     def __init__(self, api_key: str, isTestnet = False):
@@ -476,7 +477,52 @@ class CryptoBot():
                     target="source_or_target_not_avaliable",
                     rate="source_or_target_not_avaliable"
                 )
+            
+    def getCurrencies(self):
+        req = get(url=f"{self.url}/getCurrencies", headers=self.headers)
 
+        if req.json()["ok"] == False:
+            return Currencies(code="error", decimals="error", is_blockchain=False, is_fiat=False, is_stablecoin=False, name="error")
+        
+        data_list = []
+
+        for i in req.json()["result"]:
+            blockchain_url = "fiat" 
+            if i["is_blockchain"] == True: blockchain_url == i["url"]  
+            data_list.append(Currencies(
+                code=i["code"],
+                decimals=i["decimals"],
+                is_blockchain=i["is_blockchain"],
+                is_fiat=i["is_fiat"],
+                is_stablecoin=i["is_stablecoin"],
+                name=i["name"],
+                url=blockchain_url
+            ))
+        return data_list
+
+
+    def getCurrency(self, name: str):
+        req = get(url=f"{self.url}/getCurrencies", headers=self.headers)
+
+        if req.json()["ok"] == False:
+            return Currencies(code="error", decimals="error", is_blockchain=False, is_fiat=False, is_stablecoin=False, name="error")
+        
+        
+        for currency in req.json()["result"]:
+            if currency["name"] == name:
+                blockchain_url = "fiat" 
+                if currency["is_blockchain"] == True: blockchain_url == currency["url"]  
+                return Currencies(code=currency["code"], 
+                                  decimals=currency["decimals"],
+                                  is_blockchain=currency["is_blockchain"],
+                                  is_fiat=currency["is_fiat"],
+                                  is_stablecoin=currency["is_stablecoin"],
+                                  name=currency["name"],
+                                  url=blockchain_url)
+            
+        return Currencies(code="not_found", decimals="not_found", is_blockchain=False, is_fiat=False, is_stablecoin=False, name="not_found")
+
+        
         
         
         
