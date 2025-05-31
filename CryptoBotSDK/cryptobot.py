@@ -6,6 +6,7 @@ from .types.Transfer import Transfer
 from .types.Balance import Balance
 from .types.ExchangeRate import ExchangeRate
 from .types.Currencies import Currencies
+from .types.AppStats import AppStats
 
 
 class CryptoBot():
@@ -468,15 +469,14 @@ class CryptoBot():
                     target=i["target"],
                     rate=i["rate"]
                 )
-            else:
-                return ExchangeRate(
-                    is_valid="source_or_target_not_avaliable",
-                    is_fiat="source_or_target_not_avaliable",
-                    is_crypto="source_or_target_not_avaliable",
-                    source="source_or_target_not_avaliable",
-                    target="source_or_target_not_avaliable",
-                    rate="source_or_target_not_avaliable"
-                )
+        return ExchangeRate(
+            is_valid="source_or_target_not_avaliable",
+            is_fiat="source_or_target_not_avaliable",
+            is_crypto="source_or_target_not_avaliable",
+            source="source_or_target_not_avaliable",
+            target="source_or_target_not_avaliable",
+            rate="source_or_target_not_avaliable"
+        )
             
     def getCurrencies(self):
         req = get(url=f"{self.url}/getCurrencies", headers=self.headers)
@@ -521,6 +521,33 @@ class CryptoBot():
                                   url=blockchain_url)
             
         return Currencies(code="not_found", decimals="not_found", is_blockchain=False, is_fiat=False, is_stablecoin=False, name="not_found")
+    
+    def getStats(self, start_at = None, end_at = None):
+        """
+        getStats - Use this method to get app statistics. On success, returns AppStats
+        
+        Parameters:
+
+            start_at (String) - ​Optional. Date from which start calculating statistics in ISO 8601 format. Defaults is current date minus 24 hours.
+        
+            end_at (String) - ​Optional. The date on which to finish calculating statistics in ISO 8601 format. Defaults is current date.
+        """
+        data_payload = {}
+        if start_at is not None: data_payload.update({"start_at": start_at})
+        if end_at is not None: data_payload.update({"end_at": end_at})
+        req = get(f"{self.url}/getStats", headers=self.headers, json=data_payload)
+        
+        if req.json()["ok"] == False:
+            return AppStats(volume="error", conversion="error", unique_users_count="error", created_invoice_count="error", paid_invoice_count="error", start_at="error", end_at="error")
+        
+        #return req.json()
+        return AppStats(volume=req.json()["result"]["volume"], 
+                        conversion=req.json()["result"]["conversion"], 
+                        unique_users_count=req.json()["result"]["unique_users_count"], 
+                        created_invoice_count=req.json()["result"]["created_invoice_count"], 
+                        paid_invoice_count=req.json()["result"]["paid_invoice_count"], 
+                        start_at=req.json()["result"]["start_at"], 
+                        end_at=req.json()["result"]["end_at"])
 
         
         
