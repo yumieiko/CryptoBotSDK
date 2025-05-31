@@ -1,7 +1,7 @@
 from io import open
 from setuptools import setup
 
-version = '1.3.4'
+version = '1.1.0'
 
 with open('README.md', encoding='utf-8') as f:
     long_description = f.read()
